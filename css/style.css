@@ -1,0 +1,36 @@
+/********** Template CSS FasilBook **********/
+:root {
+    --primary: #2FB95D; /* Hijau Lapangan FasilBook */
+    --secondary: #343A40; /* Abu-abu Gelap */
+    --light: #F1F8F4; /* Putih Kehijauan */
+    --dark: #212529; /* Hitam Teks */
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    color: #666565;
+    background-color: white;
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: #24934a;
+    border-color: #24934a;
+}
+
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.bg-dark {
+    background-color: var(--dark) !important;
+}
