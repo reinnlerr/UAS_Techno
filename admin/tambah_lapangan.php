@@ -17,8 +17,14 @@ $paket = $q_mitra->fetch_assoc()['paket'];
 $q_count = $conn->query("SELECT COUNT(id) as total FROM lapangan WHERE id_mitra = '$mitra_id'");
 $total_lapangan = $q_count->fetch_assoc()['total'];
 
-// Tentukan Batas: Starter/Growth = 1, Scale = 10
-$batas_lapangan = ($paket == 'Scale') ? 10 : 1;
+// Tentukan Batas Lapangan berdasarkan Paket
+if ($paket == 'Scale') {
+    $batas_lapangan = 5;
+} elseif ($paket == 'Growth') {
+    $batas_lapangan = 2;
+} else {
+    $batas_lapangan = 1;
+}
 
 // Tendang user kembali ke dashboard jika sudah melebihi batas
 if ($total_lapangan >= $batas_lapangan) {

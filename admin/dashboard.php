@@ -16,7 +16,13 @@ $badge_color = ($paket == 'Scale') ? 'bg-primary' : (($paket == 'Growth') ? 'bg-
 // HITUNG JUMLAH LAPANGAN & TENTUKAN BATAS (LIMIT)
 $q_count = $conn->query("SELECT COUNT(id) as total FROM lapangan WHERE id_mitra = '$mitra_id'");
 $total_lapangan = $q_count->fetch_assoc()['total'];
-$batas_lapangan = ($paket == 'Scale') ? 10 : 1; // Starter & Growth maksimal 1, Scale maksimal 10
+if ($paket == 'Scale') {
+    $batas_lapangan = 5;
+} elseif ($paket == 'Growth') {
+    $batas_lapangan = 2;
+} else {
+    $batas_lapangan = 1;
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -78,11 +84,13 @@ $batas_lapangan = ($paket == 'Scale') ? 10 : 1; // Starter & Growth maksimal 1, 
                         <?php if($total_lapangan < $batas_lapangan): ?>
                             <a href="tambah_lapangan.php" class="btn btn-sm btn-primary fw-bold shadow-sm"><i class="fa fa-plus me-1"></i>Tambah Lapangan Baru</a>
                         <?php else: ?>
-                            <?php if($paket != 'Scale'): ?>
-                                <span class="badge bg-warning text-dark px-3 py-2 border"><i class="fa fa-lock me-1"></i>Batas 1 Lapangan Tercapai. Upgrade ke Scale!</span>
-                            <?php else: ?>
-                                <span class="badge bg-secondary px-3 py-2"><i class="fa fa-check me-1"></i>Batas Maksimal Lapangan Terpenuhi</span>
-                            <?php endif; ?>
+                                <?php if($paket == 'Starter'): ?>
+                                    <span class="badge bg-warning text-dark px-3 py-2 border"><i class="fa fa-lock me-1"></i>Batas 1 Lapangan Tercapai. Upgrade ke Growth!</span>
+                                <?php elseif($paket == 'Growth'): ?>
+                                    <span class="badge bg-warning text-dark px-3 py-2 border"><i class="fa fa-lock me-1"></i>Batas 2 Lapangan Tercapai. Upgrade ke Scale!</span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary px-3 py-2"><i class="fa fa-check me-1"></i>Batas Maksimal (5) Terpenuhi</span>
+                                <?php endif; ?>
                         <?php endif; ?>
 
                     </div>
@@ -117,8 +125,8 @@ $batas_lapangan = ($paket == 'Scale') ? 10 : 1; // Starter & Growth maksimal 1, 
                                                  <div class="text-center mt-1"><small class="text-muted" style="font-size: 10px;">Kosongkan & klik Set untuk hapus promo</small></div>
                                              </form>
                                          <?php endif; ?>
-                                    </div>
-                                </div>
+                                     </div>
+                                 </div>
                             <?php 
                                 endwhile; 
                             else:

@@ -58,20 +58,18 @@
                 } else {
                     echo "<div class='bg-secondary text-white p-5 text-center h-100 d-flex align-items-center justify-content-center' style='font-size: 24px;'><i class='fa fa-image fa-2x d-block mb-2'></i> Gambar Lapangan</div>";
                 }
+                // Hitung tampilan harga (di luar echo string)
+                if ($is_premium && !empty($row['harga_promo'])) {
+                    $harga_display = "<span class='text-muted text-decoration-line-through small me-2' style='font-size:0.85rem;'>Rp ".number_format($row['harga_per_jam'], 0, ',', '.')."</span> <span class='text-success fw-bold'>Rp ".number_format($row['harga_promo'], 0, ',', '.')." / jam</span>";
+                } else {
+                    $harga_display = "<span class='text-primary fw-bold'>Rp ".number_format($row['harga_per_jam'], 0, ',', '.')." / jam</span>";
+                }
                 echo "      </div>
                         <div class='card-body'>
                             <h5 class='card-title text-dark'>{$row['nama_lapangan']}</h5>
                             <p class='card-text text-muted'><i class='fa fa-map-marker-alt text-primary me-2'></i>{$row['lokasi']}</p>
-                            <?php
-                            $harga_display = '';
-                            if ($is_premium && !empty($row['harga_promo'])) {
-                                $harga_display = "<span class='text-muted text-decoration-line-through small me-2' style='font-size:0.85rem;'>Rp ".number_format($row['harga_per_jam'], 0, ',', '.')."</span> <span class='text-success fw-bold'>Rp ".number_format($row['harga_promo'], 0, ',', '.')." / jam</span>";
-                            } else {
-                                $harga_display = "<span class='text-primary fw-bold'>Rp ".number_format($row['harga_per_jam'], 0, ',', '.')." / jam</span>";
-                            }
-                            ?>
-                            <h5 class='mb-3'><?php echo $harga_display; ?></h5>
-                            <a href='booking.php?id={$row['id']}' class='btn btn-primary w-100 py-2'>Lihat Jadwal & Booking</a>
+                            <h5 class='mb-3'>{$harga_display}</h5>
+                            <a href='booking.php?id={$row['id']}' class='btn btn-primary w-100 py-2'>Lihat Jadwal &amp; Booking</a>
                         </div>
                     </div>
                 </div>";
