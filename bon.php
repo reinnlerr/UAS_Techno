@@ -5,9 +5,10 @@ if(!isset($_GET['pesanan_id'])){
     exit;
 }
 $pesanan_id = intval($_GET['pesanan_id']);
-$query = $conn->query("SELECT p.*, l.nama_lapangan, l.lokasi, l.harga_per_jam 
+$query = $conn->query("SELECT p.*, l.nama_lapangan, l.lokasi, l.harga_per_jam, l.harga_promo, m.paket 
                         FROM pesanan p 
                         JOIN lapangan l ON p.lapangan_id = l.id 
+                        JOIN mitra m ON l.id_mitra = m.id
                         WHERE p.id = $pesanan_id");
 if($query->num_rows == 0){
     echo "<script>alert('Data pesanan tidak ditemukan.'); window.location='index.php';</script>";
@@ -311,7 +312,10 @@ if ($status == 'Lunas') {
 
             <div class="bon-total">
                 <span class="label">Total Bayar</span>
-                <span class="amount">Rp <?php echo number_format($data['harga_per_jam'], 0, ',', '.'); ?></span>
+                <?php
+                $harga_sebenarnya = ($data['paket'] == 'Scale' && !empty($data['harga_promo'])) ? $data['harga_promo'] : $data['harga_per_jam'];
+                ?>
+                <span class="amount">Rp <?php echo number_format($harga_sebenarnya, 0, ',', '.'); ?></span>
             </div>
 
             <div class="bon-footer">

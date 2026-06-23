@@ -99,7 +99,24 @@ $batas_lapangan = ($paket == 'Scale') ? 10 : 1; // Starter & Growth maksimal 1, 
                                         <img src="<?php echo $img_path; ?>" class="lapangan-img" onerror="this.src='https://via.placeholder.com/300x150/2FB95D/FFFFFF?text=FasilBook'">
                                         <h6 class="fw-bold mb-1 text-dark"><?php echo htmlspecialchars($lap['nama_lapangan']); ?></h6>
                                         <div class="text-muted small mb-2"><i class="fa fa-map-marker-alt me-1"></i><?php echo htmlspecialchars($lap['lokasi'] ?? '-'); ?></div>
-                                        <span class="badge bg-success text-white w-100 py-2 fs-6">Rp <?php echo number_format($lap['harga_per_jam'],0,',','.'); ?> / jam</span>
+                                        <?php if (!empty($lap['harga_promo'])): ?>
+                                             <span class="badge bg-danger text-white w-100 py-2 fs-6 mb-2">Rp <?php echo number_format($lap['harga_promo'],0,',','.'); ?> / jam (Promo)</span>
+                                             <div class="text-center mb-2"><small class="text-muted text-decoration-line-through">Normal: Rp <?php echo number_format($lap['harga_per_jam'],0,',','.'); ?></small></div>
+                                         <?php else: ?>
+                                             <span class="badge bg-success text-white w-100 py-2 fs-6">Rp <?php echo number_format($lap['harga_per_jam'],0,',','.'); ?> / jam</span>
+                                         <?php endif; ?>
+
+                                         <?php if ($paket == 'Scale'): ?>
+                                             <form action="update_promo.php" method="POST" class="mt-3 border-top pt-2">
+                                                 <input type="hidden" name="id_lapangan" value="<?php echo $lap['id']; ?>">
+                                                 <label class="form-label small fw-bold text-muted mb-1"><i class="fa fa-tag text-warning"></i> Set Harga Promo</label>
+                                                 <div class="input-group input-group-sm">
+                                                     <input type="number" name="harga_promo" class="form-control" placeholder="Harga Promo" value="<?php echo htmlspecialchars($lap['harga_promo'] ?? ''); ?>">
+                                                     <button class="btn btn-warning fw-bold text-dark" type="submit">Set</button>
+                                                 </div>
+                                                 <div class="text-center mt-1"><small class="text-muted" style="font-size: 10px;">Kosongkan & klik Set untuk hapus promo</small></div>
+                                             </form>
+                                         <?php endif; ?>
                                     </div>
                                 </div>
                             <?php 

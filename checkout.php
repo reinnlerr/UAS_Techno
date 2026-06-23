@@ -5,7 +5,7 @@ $id_lapangan = isset($_GET['id']) ? $_GET['id'] : 0;
 
 // Ambil data lapangan sekaligus data paket & komisi dari mitra pemilik lapangan tersebut
 $query = $conn->query("
-    SELECT l.nama_lapangan, l.harga_per_jam, m.paket, m.komisi_persen 
+    SELECT l.nama_lapangan, l.harga_per_jam, l.harga_promo, m.paket, m.komisi_persen 
     FROM lapangan l 
     JOIN mitra m ON l.id_mitra = m.id 
     WHERE l.id = '$id_lapangan'
@@ -14,7 +14,8 @@ $data = $query->fetch_assoc();
 
 if(!$data) die("Data lapangan tidak ditemukan.");
 
-$harga_lapangan = $data['harga_per_jam'];
+$is_promo_active = ($data['paket'] == 'Scale' && !empty($data['harga_promo']));
+$harga_lapangan = $is_promo_active ? $data['harga_promo'] : $data['harga_per_jam'];
 $persen_komisi  = $data['komisi_persen'];
 
 // HITUNG BIAYA LAYANAN/ADMIN DINAMIS (Berdasarkan paket mitra)

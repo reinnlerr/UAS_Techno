@@ -65,6 +65,7 @@ CREATE TABLE `lapangan` (
   `nama_lapangan` varchar(100) NOT NULL,
   `lokasi` text NOT NULL,
   `harga_per_jam` int(11) NOT NULL,
+  `harga_promo` int(11) DEFAULT NULL,
   `gambar` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_mitra` (`id_mitra`),
@@ -73,13 +74,13 @@ CREATE TABLE `lapangan` (
 
 /* Dumping data untuk tabel `lapangan` */
 
-INSERT INTO `lapangan` (`id`, `id_mitra`, `nama_lapangan`, `lokasi`, `harga_per_jam`, `gambar`) VALUES
-(1, 1, 'Arcamanik Court A (Sintetis)', 'Jl. Pacuan Kuda No. 50, Arcamanik, Bandung', 120000, 'img/lapangan_1.png'),
-(2, 2, 'Antapani Futsal Center', 'Jl. Terusan Jakarta No. 12, Antapani, Bandung', 150000, 'img/lapangan_2.png'),
-(3, 3, 'Endah Arena 1 (Vinyl Premium)', 'Jl. Cisaranten Endah No. 8, Arcamanik, Bandung', 200000, 'img/lapangan_3.png'),
-(4, 3, 'Endah Arena 2 (Sintetis)', 'Jl. Cisaranten Endah No. 8, Arcamanik, Bandung', 150000, 'img/lapangan_4.png'),
-(5, 3, 'Endah Arena 3 (Interlock)', 'Jl. Cisaranten Endah No. 8, Arcamanik, Bandung', 175000, 'img/lapangan_5.png'),
-(6, 4, 'Fu Court', 'Jl. Soekarno-Hatta No. 45, Bandung', 100000, 'img/lapangan_6.png');
+INSERT INTO `lapangan` (`id`, `id_mitra`, `nama_lapangan`, `lokasi`, `harga_per_jam`, `harga_promo`, `gambar`) VALUES
+(1, 1, 'Arcamanik Court A (Sintetis)', 'Jl. Pacuan Kuda No. 50, Arcamanik, Bandung', 120000, NULL, 'img/lapangan_1.png'),
+(2, 2, 'Antapani Futsal Center', 'Jl. Terusan Jakarta No. 12, Antapani, Bandung', 150000, NULL, 'img/lapangan_2.png'),
+(3, 3, 'Endah Arena 1 (Vinyl Premium)', 'Jl. Cisaranten Endah No. 8, Arcamanik, Bandung', 200000, 160000, 'img/lapangan_3.png'),
+(4, 3, 'Endah Arena 2 (Sintetis)', 'Jl. Cisaranten Endah No. 8, Arcamanik, Bandung', 150000, 130000, 'img/lapangan_4.png'),
+(5, 3, 'Endah Arena 3 (Interlock)', 'Jl. Cisaranten Endah No. 8, Arcamanik, Bandung', 175000, NULL, 'img/lapangan_5.png'),
+(6, 4, 'Fu Court', 'Jl. Soekarno-Hatta No. 45, Bandung', 100000, 90000, 'img/lapangan_6.png');
 
 /* -------------------------------------------------------- */
 /* Struktur dari tabel `pesanan` */

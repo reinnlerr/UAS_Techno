@@ -32,13 +32,27 @@
         <h3 class="text-center mb-5 font-poppins">Katalog Lapangan Mitra (Arcamanik & Sekitarnya)</h3>
         <div class="row g-4">
             <?php
-            $res = $conn->query("SELECT * FROM lapangan");
+            $res = $conn->query("SELECT l.*, m.paket 
+                                 FROM lapangan l 
+                                 JOIN mitra m ON l.id_mitra = m.id 
+                                 ORDER BY 
+                                     CASE m.paket 
+                                         WHEN 'Scale' THEN 1 
+                                         WHEN 'Growth' THEN 2 
+                                         WHEN 'Starter' THEN 3 
+                                     END, l.id DESC");
             while($row = $res->fetch_assoc()){
                 $gambar = !empty($row['gambar']) ? $row['gambar'] : '';
+                $is_premium = ($row['paket'] == 'Scale');
+                $badge_html = '';
+                if ($is_premium) {
+                    $badge_html = "<div class='position-absolute top-0 start-0 m-3 badge bg-warning text-dark fw-bold px-3 py-2 shadow-sm' style='z-index: 10; font-size: 0.75rem; border-radius: 50px; border: 1px solid rgba(255,255,255,0.4);'><i class='fa fa-star text-danger me-1'></i> PREMIUM PARTNER</div>";
+                }
                 echo "
                 <div class='col-md-4'>
-                    <div class='card h-100 shadow-sm border-0 rounded overflow-hidden'>
-                        <div class='card-img-wrapper' style='height: 220px; overflow: hidden;'>";
+                    <div class='card h-100 shadow-sm border-0 rounded overflow-hidden position-relative'>
+                        {$badge_html}
+                        <div class='card-img-wrapper' style='height: 220px; overflow: hidden; position: relative;'>";
                 if($gambar) {
                     echo "<img src='{$gambar}' alt='{$row['nama_lapangan']}' class='w-100 h-100' style='object-fit: cover;'>";
                 } else {
@@ -48,7 +62,15 @@
                         <div class='card-body'>
                             <h5 class='card-title text-dark'>{$row['nama_lapangan']}</h5>
                             <p class='card-text text-muted'><i class='fa fa-map-marker-alt text-primary me-2'></i>{$row['lokasi']}</p>
-                            <h5 class='text-primary fw-bold mb-3'>Rp ".number_format($row['harga_per_jam'], 0, ',', '.')." / jam</h5>
+                            <?php
+                            $harga_display = '';
+                            if ($is_premium && !empty($row['harga_promo'])) {
+                                $harga_display = "<span class='text-muted text-decoration-line-through small me-2' style='font-size:0.85rem;'>Rp ".number_format($row['harga_per_jam'], 0, ',', '.')."</span> <span class='text-success fw-bold'>Rp ".number_format($row['harga_promo'], 0, ',', '.')." / jam</span>";
+                            } else {
+                                $harga_display = "<span class='text-primary fw-bold'>Rp ".number_format($row['harga_per_jam'], 0, ',', '.')." / jam</span>";
+                            }
+                            ?>
+                            <h5 class='mb-3'><?php echo $harga_display; ?></h5>
                             <a href='booking.php?id={$row['id']}' class='btn btn-primary w-100 py-2'>Lihat Jadwal & Booking</a>
                         </div>
                     </div>

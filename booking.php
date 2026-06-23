@@ -21,7 +21,7 @@
             <?php
             for($i=8; $i<22; $i++){
                 $jam = sprintf("%02d:00:00", $i);
-                $cek = $conn->query("SELECT id FROM pesanan WHERE lapangan_id=$id AND tanggal_booking='$tgl' AND jam_mulai='$jam'");
+                $cek = $conn->query("SELECT id FROM pesanan WHERE lapangan_id=$id AND tanggal_booking='$tgl' AND jam_mulai='$jam' AND status_pembayaran != 'Dibatalkan (Refund)'");
                 if($cek->num_rows > 0) {
                     echo "<div class='col-md-3 col-6'><button class='btn btn-danger w-100 py-3 fw-bold shadow-sm' disabled><i class='fa fa-ban me-1'></i> $i:00 (Terisi)</button></div>";
                 } else {

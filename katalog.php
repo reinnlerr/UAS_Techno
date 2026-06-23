@@ -19,19 +19,37 @@
         <h2 class="mb-4 text-center">Daftar Lapangan Futsal (Arcamanik & Sekitarnya)</h2>
         <div class="row g-4">
             <?php
-            $result = $conn->query("SELECT * FROM lapangan");
+            $result = $conn->query("SELECT l.*, m.paket 
+                                    FROM lapangan l 
+                                    JOIN mitra m ON l.id_mitra = m.id 
+                                    ORDER BY 
+                                        CASE m.paket 
+                                            WHEN 'Scale' THEN 1 
+                                            WHEN 'Growth' THEN 2 
+                                            WHEN 'Starter' THEN 3 
+                                        END, l.id DESC");
             if($result && $result->num_rows > 0){
                 while($row = $result->fetch_assoc()){
                     $gambar = !empty($row['gambar']) ? $row['gambar'] : '';
+                    $is_premium = ($row['paket'] == 'Scale');
+                    $badge_html = '';
+                    if ($is_premium) {
+                        $badge_html = '<div class="position-absolute top-0 start-0 m-3 badge bg-warning text-dark fw-bold px-3 py-2 shadow-sm" style="z-index: 10; font-size: 0.75rem; border-radius: 50px; border: 1px solid rgba(255,255,255,0.4);"><i class="fa fa-star text-danger me-1"></i> PREMIUM PARTNER</div>';
+                    }
                     echo '<div class="col-md-4">
-                            <div class="card h-100 shadow-sm overflow-hidden border-0 rounded">';
+                            <div class="card h-100 shadow-sm overflow-hidden border-0 rounded position-relative">
+                                '.$badge_html.'';
                     if($gambar){
                         echo '<img src="'.$gambar.'" alt="'.$row['nama_lapangan'].'" class="card-img-top" style="height: 200px; object-fit: cover;">';
                     }
                     echo '      <div class="card-body">
                                     <h5 class="card-title text-primary">'.$row['nama_lapangan'].'</h5>
                                     <p class="card-text text-muted"><i class="fa fa-map-marker-alt me-1"></i>'.$row['lokasi'].'</p>
+                                    '.($is_premium && !empty($row['harga_promo']) ? '
+                                    <h6 class="mb-0"><span class="text-muted text-decoration-line-through small me-2" style="font-size:0.85rem;">Rp '.number_format($row['harga_per_jam'], 0, ',', '.').'</span> <span class="text-success fw-bold">Rp '.number_format($row['harga_promo'], 0, ',', '.').' / jam</span></h6>
+                                    ' : '
                                     <h6 class="fw-bold text-dark">Rp '.number_format($row['harga_per_jam'], 0, ',', '.').' / jam</h6>
+                                    ').'
                                 </div>
                             </div>
                           </div>';
