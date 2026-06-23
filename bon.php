@@ -16,16 +16,39 @@ if($query->num_rows == 0){
 $data = $query->fetch_assoc();
 $no_bon = 'FB-' . str_pad($data['id'], 5, '0', STR_PAD_LEFT);
 $tanggal_cetak = date('d/m/Y H:i:s');
+$status = $data['status_pembayaran'];
+
+// Atur Auto-refresh setiap 10 detik jika status masih menunggu konfirmasi
+$refresh_meta = ($status == 'Menunggu Konfirmasi') ? '<meta http-equiv="refresh" content="10">' : '';
+
+// LOGIKA 1 CARD DINAMIS: Atur Warna, Ikon, dan Teks berdasarkan Status
+if ($status == 'Lunas') {
+    $header_bg = 'linear-gradient(135deg, #2FB95D 0%, #1a8a3e 100%)';
+    $icon = '<i class="fas fa-check"></i>';
+    $title = 'Pembayaran Berhasil!';
+    $badge_bg = '#d4edda';
+    $badge_color = '#155724';
+    $badge_text = '<i class="fas fa-check-circle"></i> LUNAS';
+} else {
+    // Tampilan untuk Menunggu Konfirmasi (Kuning/Orange)
+    $header_bg = 'linear-gradient(135deg, #f6d365 0%, #ff8142 100%)';
+    $icon = '<i class="fas fa-spinner fa-spin"></i>'; // Animasi Muter
+    $title = 'Menunggu Konfirmasi';
+    $badge_bg = '#fff3cd';
+    $badge_color = '#856404';
+    $badge_text = '<i class="fas fa-clock"></i> PENDING';
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Bon Pembayaran - FasilBook</title>
+    <title>Nota Pembayaran - FasilBook</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <?php echo $refresh_meta; ?>
     <style>
         body {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
@@ -51,7 +74,7 @@ $tanggal_cetak = date('d/m/Y H:i:s');
         }
 
         .bon-header {
-            background: linear-gradient(135deg, #2FB95D 0%, #1a8a3e 100%);
+            /* Background dihapus dari CSS dan dipindah ke inline HTML agar bisa dinamis */
             color: white;
             padding: 30px 25px;
             text-align: center;
@@ -165,8 +188,6 @@ $tanggal_cetak = date('d/m/Y H:i:s');
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: #d4edda;
-            color: #155724;
             padding: 8px 20px;
             border-radius: 50px;
             font-weight: 600;
@@ -192,6 +213,7 @@ $tanggal_cetak = date('d/m/Y H:i:s');
             border-radius: 10px;
             font-weight: 600;
             font-size: 0.9rem;
+            text-decoration: none;
         }
 
         .btn-print {
@@ -204,12 +226,17 @@ $tanggal_cetak = date('d/m/Y H:i:s');
             background: #24934a;
             color: white;
         }
+        
+        .btn-pending {
+            background: #f6d365;
+            color: #333;
+            border: none;
+        }
 
         .btn-home {
             background: #f0f0f0;
             color: #333;
             border: none;
-            text-decoration: none;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -238,11 +265,12 @@ $tanggal_cetak = date('d/m/Y H:i:s');
 <body>
     <div class="bon-container">
         <div class="bon-card">
-            <div class="bon-header">
+            
+            <div class="bon-header" style="background: <?php echo $header_bg; ?>;">
                 <div class="check-icon">
-                    <i class="fas fa-check"></i>
+                    <?php echo $icon; ?>
                 </div>
-                <h4>Pembayaran Berhasil!</h4>
+                <h4><?php echo $title; ?></h4>
                 <div class="bon-number"><?php echo $no_bon; ?></div>
             </div>
 
@@ -279,15 +307,24 @@ $tanggal_cetak = date('d/m/Y H:i:s');
             </div>
 
             <div class="bon-footer">
-                <div class="status-badge">
-                    <i class="fas fa-check-circle"></i> LUNAS
+                
+                <div class="status-badge" style="background: <?php echo $badge_bg; ?>; color: <?php echo $badge_color; ?>;">
+                    <?php echo $badge_text; ?>
                 </div>
+                
                 <div class="timestamp">Dicetak: <?php echo $tanggal_cetak; ?></div>
 
                 <div class="btn-actions">
-                    <button onclick="window.print()" class="btn btn-print">
-                        <i class="fa fa-print me-1"></i> Cetak Bon
-                    </button>
+                    <?php if($status == 'Lunas'): ?>
+                        <button onclick="window.print()" class="btn btn-print">
+                            <i class="fa fa-print me-1"></i> Cetak Bon
+                        </button>
+                    <?php else: ?>
+                        <a href="bon.php?pesanan_id=<?php echo $pesanan_id; ?>" class="btn btn-pending d-flex align-items-center justify-content-center">
+                            <i class="fas fa-sync-alt me-1"></i> Refresh Status
+                        </a>
+                    <?php endif; ?>
+
                     <a href="index.php" class="btn btn-home">
                         <i class="fa fa-home me-1"></i> Beranda
                     </a>
