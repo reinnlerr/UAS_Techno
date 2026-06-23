@@ -1,6 +1,6 @@
 /********** Template CSS FasilBook **********/
 :root {
-    --primary: #2FB95D; /* Hijau Lapangan FasilBook */
+    --primary: #2FB95D; /* Hijau Lapangan Futsal */
     --secondary: #343A40; /* Abu-abu Gelap */
     --light: #F1F8F4; /* Putih Kehijauan */
     --dark: #212529; /* Hitam Teks */
@@ -33,4 +33,11 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 
 .bg-dark {
     background-color: var(--dark) !important;
+}
+
+.hero-header {
+    background: linear-gradient(rgba(15, 23, 43, .85), rgba(15, 23, 43, .85)), url('../img/bg-hero.jpg');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }

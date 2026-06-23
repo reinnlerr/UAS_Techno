@@ -1,3 +1,4 @@
+<?php include 'db.php'; ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -10,49 +11,51 @@
     <link href="css/style.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4 py-3">
-        <a href="index.php" class="navbar-brand">
-            <h1 class="text-primary m-0"><i class="fa fa-futbol me-3"></i>FasilBook</h1>
-        </a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4 py-3 shadow">
+        <a href="index.php" class="navbar-brand"><h2 class="text-primary m-0"><i class="fa fa-futbol me-2"></i>FasilBook</h2></a>
         <div class="collapse navbar-collapse">
-            <div class="navbar-nav ms-auto py-0 pe-4">
-                <a href="index.php" class="nav-item nav-link active">Beranda</a>
-                <a href="katalog.php" class="nav-item nav-link">Katalog</a>
-                <a href="admin/dashboard.php" class="nav-item nav-link">Login Mitra</a>
+            <div class="navbar-nav ms-auto pe-4">
+                <a href="index.php" class="nav-item nav-link active text-white">Beranda</a>
+                <a href="admin/dashboard.php" class="nav-item nav-link text-white-50">Dashboard Mitra</a>
             </div>
-            <a href="#booking" class="btn btn-primary py-2 px-4">Booking Cepat</a>
         </div>
     </nav>
 
-    <div class="container-fluid py-5 bg-dark text-white mb-5">
-        <div class="container text-center py-5">
-            <h1 class="display-3 text-white">Pesan Lapangan Futsal,<br>Kapan Saja, Di Mana Saja</h1>
-            <p class="lead mb-4">Platform digital terintegrasi untuk memudahkan proses reservasi lapangan futsal untuk komunitas dan individu.</p>
-            <a href="katalog.php" class="btn btn-primary py-3 px-5">Lihat Katalog Lapangan</a>
+    <div class="container-fluid py-5 bg-dark hero-header mb-5 text-center text-white">
+        <div class="container my-5 py-5">
+            <h1 class="display-3 animated slideInLeft">Pesan Lapangan Futsal,<br>Kapan Saja, Di Mana Saja</h1>
+            <p class="lead my-4">Solusi administrasi digital terintegrasi untuk komunitas futsal & pengelola venue.</p>
         </div>
     </div>
 
-    <div class="container py-5" id="booking">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 bg-light p-5 rounded shadow">
-                <h2 class="text-center mb-4">Cek & Booking Jadwal</h2>
-                <form action="kirim_pesan.php" method="POST">
-                    <div class="mb-3">
-                        <label>Nama Pemesan / Tim</label>
-                        <input type="text" name="nama" class="form-control" required>
+    <div class="container py-5">
+        <h3 class="text-center mb-5 font-poppins">Katalog Lapangan Mitra (Arcamanik & Sekitarnya)</h3>
+        <div class="row g-4">
+            <?php
+            $res = $conn->query("SELECT * FROM lapangan");
+            while($row = $res->fetch_assoc()){
+                $gambar = !empty($row['gambar']) ? $row['gambar'] : '';
+                echo "
+                <div class='col-md-4'>
+                    <div class='card h-100 shadow-sm border-0 rounded overflow-hidden'>
+                        <div class='card-img-wrapper' style='height: 220px; overflow: hidden;'>";
+                if($gambar) {
+                    echo "<img src='{$gambar}' alt='{$row['nama_lapangan']}' class='w-100 h-100' style='object-fit: cover;'>";
+                } else {
+                    echo "<div class='bg-secondary text-white p-5 text-center h-100 d-flex align-items-center justify-content-center' style='font-size: 24px;'><i class='fa fa-image fa-2x d-block mb-2'></i> Gambar Lapangan</div>";
+                }
+                echo "      </div>
+                        <div class='card-body'>
+                            <h5 class='card-title text-dark'>{$row['nama_lapangan']}</h5>
+                            <p class='card-text text-muted'><i class='fa fa-map-marker-alt text-primary me-2'></i>{$row['lokasi']}</p>
+                            <h5 class='text-primary fw-bold mb-3'>Rp ".number_format($row['harga_per_jam'], 0, ',', '.')." / jam</h5>
+                            <a href='booking.php?id={$row['id']}' class='btn btn-primary w-100 py-2'>Lihat Jadwal & Booking</a>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label>Pilih Lapangan</label>
-                        <select name="lapangan_id" class="form-select" required>
-                            <option value="1">Futsal Merdeka Bandung</option>
-                            <option value="2">Supratman Futsal</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 py-3">Konfirmasi Booking</button>
-                </form>
-            </div>
+                </div>";
+            }
+            ?>
         </div>
     </div>
-    <script src="js/main.js"></script>
 </body>
 </html>
