@@ -12,10 +12,11 @@ if (isset($_GET['id'])) {
     $id_pesanan = $_GET['id'];
     $mitra_id = $_SESSION['mitra_id'];
 
-    // Update status menjadi Lunas dengan keamanan memastikan pesanan itu milik lapangan mitra tsb
+    // Update status menjadi Lunas + dana Siap Dicairkan agar Admin Pusat bisa mencairkan
     $query = "UPDATE pesanan p 
               JOIN lapangan l ON p.lapangan_id = l.id 
-              SET p.status_pembayaran = 'Lunas' 
+              SET p.status_pembayaran = 'Lunas',
+                  p.status_dana = 'Siap Dicairkan' 
               WHERE p.id = '$id_pesanan' AND l.id_mitra = '$mitra_id'";
               
     if ($conn->query($query)) {

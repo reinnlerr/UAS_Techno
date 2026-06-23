@@ -122,17 +122,24 @@ $batas_lapangan = ($paket == 'Scale') ? 10 : 1; // Starter & Growth maksimal 1, 
                             </div>
                             <div class="card-body p-0">
                                 <table class="table table-striped align-middle m-0">
-                                    <thead><tr><th>Nama</th><th>Tgl</th><th>Status</th><th>Aksi</th></tr></thead>
+                                    <thead><tr><th>Nama</th><th>Lapangan</th><th>Tanggal & Jam</th><th>Status</th><th>Aksi</th></tr></thead>
                                     <tbody>
                                         <?php
-                                        $result = $conn->query("SELECT p.* FROM pesanan p JOIN lapangan l ON p.lapangan_id = l.id WHERE l.id_mitra = '$mitra_id' ORDER BY p.id DESC LIMIT 5");
+                                        $result = $conn->query("SELECT p.*, l.nama_lapangan FROM pesanan p JOIN lapangan l ON p.lapangan_id = l.id WHERE l.id_mitra = '$mitra_id' ORDER BY p.id DESC LIMIT 5");
                                         while ($row = $result->fetch_assoc()):
                                             $st = $row['status_pembayaran'];
-                                            $bdg = ($st == 'Lunas') ? 'bg-success' : 'bg-warning text-dark';
+                                            if ($st == 'Lunas') {
+                                                $bdg = 'bg-success';
+                                            } elseif ($st == 'Menunggu Konfirmasi') {
+                                                $bdg = 'bg-warning text-dark';
+                                            } else {
+                                                $bdg = 'bg-danger';
+                                            }
                                         ?>
                                         <tr>
-                                            <td class="fw-bold"><?php echo $row['nama_pemesan']; ?></td>
-                                            <td><?php echo $row['tanggal_booking']; ?></td>
+                                            <td class="fw-bold"><?php echo htmlspecialchars($row['nama_pemesan']); ?></td>
+                                            <td><small><?php echo htmlspecialchars($row['nama_lapangan']); ?></small></td>
+                                            <td><small><?php echo date('d/m/Y', strtotime($row['tanggal_booking'])) . ' ' . substr($row['jam_mulai'], 0, 5); ?></small></td>
                                             <td><span class="badge <?php echo $bdg; ?>"><?php echo $st; ?></span></td>
                                             <td>
                                                 <?php if($st == 'Menunggu Konfirmasi') echo "<a href='konfirmasi.php?id={$row['id']}' class='btn btn-sm btn-success'>Konfirmasi</a>"; ?>
@@ -160,16 +167,27 @@ $batas_lapangan = ($paket == 'Scale') ? 10 : 1; // Starter & Growth maksimal 1, 
                                 <i class="fa fa-chart-pie me-2"></i>Analitik & Laporan Keuangan
                             </div>
                             <div class="card-body">
+                                <?php
+                                // Ambil total pendapatan lunas
+                                $q_finance = $conn->query("SELECT SUM(l.harga_per_jam) as total FROM pesanan p JOIN lapangan l ON p.lapangan_id = l.id WHERE l.id_mitra = '$mitra_id' AND p.status_pembayaran = 'Lunas'");
+                                $total_kotor = $q_finance->fetch_assoc()['total'] ?? 0;
+                                $potongan_fb = ($total_kotor * $komisi) / 100;
+                                $bersih_mitra = $total_kotor - $potongan_fb;
+                                ?>
                                 <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
-                                    <span class="text-muted">Total Pendapatan Bulan Ini</span>
-                                    <span class="fw-bold text-success">Rp 4.500.000</span>
+                                    <span class="text-muted">Total Pendapatan (Kotor)</span>
+                                    <span class="fw-bold text-success">Rp <?php echo number_format($total_kotor, 0, ',', '.'); ?></span>
                                 </div>
                                 <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
-                                    <span class="text-muted">Potongan Komisi FasilBook</span>
-                                    <span class="fw-bold text-danger">- Rp 270.000</span>
+                                    <span class="text-muted">Potongan Komisi FasilBook (<?php echo $komisi; ?>%)</span>
+                                    <span class="fw-bold text-danger">- Rp <?php echo number_format($potongan_fb, 0, ',', '.'); ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3 border-bottom pb-2 bg-light p-2 rounded">
+                                    <span class="fw-bold">Total Bersih Diterima</span>
+                                    <span class="fw-bold text-primary">Rp <?php echo number_format($bersih_mitra, 0, ',', '.'); ?></span>
                                 </div>
                                 
-                                <a href="export_laporan.php" class="btn btn-outline-primary w-100">
+                                <a href="export_laporan.php" class="btn btn-outline-primary w-100 mt-2">
                                     <i class="fa fa-download me-2"></i>Download Laporan Excel
                                 </a>
                                 

@@ -29,6 +29,14 @@ if ($status == 'Lunas') {
     $badge_bg = '#d4edda';
     $badge_color = '#155724';
     $badge_text = '<i class="fas fa-check-circle"></i> LUNAS';
+} elseif ($status == 'Dibatalkan (Refund)') {
+    // Tampilan untuk Refund (Merah)
+    $header_bg = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+    $icon = '<i class="fas fa-times"></i>';
+    $title = 'Pesanan Dibatalkan';
+    $badge_bg = '#f8d7da';
+    $badge_color = '#721c24';
+    $badge_text = '<i class="fas fa-times-circle"></i> REFUND';
 } else {
     // Tampilan untuk Menunggu Konfirmasi (Kuning/Orange)
     $header_bg = 'linear-gradient(135deg, #f6d365 0%, #ff8142 100%)';

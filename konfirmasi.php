@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../db.php'; // Pastikan path ke db.php benar
+include 'db.php'; // Pastikan path ke db.php benar
 
 // 1. Keamanan: Hanya mitra yang sudah login yang boleh mengakses ini
 if (!isset($_SESSION['mitra_id'])) {
