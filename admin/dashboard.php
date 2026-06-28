@@ -13,6 +13,33 @@ $paket = $data_mitra['paket'];
 $komisi = $data_mitra['komisi_persen'];
 $badge_color = ($paket == 'Scale') ? 'bg-primary' : (($paket == 'Growth') ? 'bg-info text-dark' : 'bg-secondary');
 
+// LOGIKA PENGAJUAN UPGRADE DARI DASHBOARD
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action_upgrade'])) {
+    if ($_POST['action_upgrade'] == 'premium') {
+        // Cek apakah sudah ada pengajuan
+        $cek = $conn->query("SELECT id FROM pengajuan_upgrade WHERE id_mitra = '$mitra_id' AND status = 'Pending Premium'");
+        if ($cek->num_rows == 0) {
+            $conn->query("INSERT INTO pengajuan_upgrade (id_mitra, paket_asal, status) VALUES ('$mitra_id', '$paket', 'Pending Premium')");
+        }
+        
+        if (isset($_POST['is_ajax']) && $_POST['is_ajax'] == '1') {
+            echo json_encode(['status' => 'success']);
+            exit;
+        }
+
+        echo "<script>alert('Pengajuan Upgrade ke Premium berhasil dikirim! Silakan tunggu konfirmasi Super Admin.'); window.location.href='dashboard.php';</script>";
+        exit;
+    } elseif ($_POST['action_upgrade'] == 'normal') {
+        // Melanjutkan alur pembayaran standar/growth asli
+        if (isset($_POST['is_ajax']) && $_POST['is_ajax'] == '1') {
+            echo json_encode(['status' => 'redirect', 'url' => 'pembayaran_mitra.php?id=' . $mitra_id]);
+            exit;
+        }
+        header("Location: pembayaran_mitra.php?id=" . $mitra_id);
+        exit;
+    }
+}
+
 // HITUNG JUMLAH LAPANGAN & TENTUKAN BATAS (LIMIT)
 $q_count = $conn->query("SELECT COUNT(id) as total FROM lapangan WHERE id_mitra = '$mitra_id'");
 $total_lapangan = $q_count->fetch_assoc()['total'];
@@ -73,7 +100,15 @@ if ($paket == 'Scale') {
                         <h5 class="fw-bold text-dark mb-1"><i class="fa fa-rocket me-2 text-warning"></i>Tingkatkan ke Paket Growth!</h5>
                         <span class="text-dark">Turunkan komisi menjadi <strong>6%</strong> dan buka akses ke Laporan Transaksi Lengkap hanya Rp99.000/Bulan.</span>
                     </div>
-                    <button class="btn btn-warning fw-bold text-dark px-4 py-2 shadow-sm">Upgrade Sekarang</button>
+                    <button type="button" class="btn btn-warning fw-bold text-dark px-4 py-2 shadow-sm btn-upgrade-dash" data-paket="Starter">Upgrade Sekarang</button>
+                </div>
+                <?php elseif($paket == 'Growth'): ?>
+                <div class="alert alert-info border-info shadow-sm d-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1"><i class="fa fa-gem me-2 text-primary"></i>Tingkatkan ke Paket Premium!</h5>
+                        <span class="text-dark">Turunkan komisi menjadi <strong>4%</strong>, batas 5 lapangan, dan fitur analitik maksimal!</span>
+                    </div>
+                    <button type="button" class="btn btn-info fw-bold text-dark px-4 py-2 shadow-sm btn-upgrade-dash" data-paket="Growth">Upgrade Sekarang</button>
                 </div>
                 <?php endif; ?>
 
@@ -224,5 +259,120 @@ if ($paket == 'Scale') {
             </div>
         </div>
     </div>
+
+    <!-- Modal Konfirmasi Upgrade Dinamis -->
+    <div class="modal fade" id="modalUpgradeDash" tabindex="-1" aria-labelledby="modalUpgradeDashLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-white">
+                    <h5 class="modal-title fw-bold text-success" id="modalUpgradeDashLabel">Tawaran Spesial Premium!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="fa fa-gem fa-3x text-warning mb-3"></i>
+                    <h5 class="fw-bold mb-3">Tunggu Dulu!</h5>
+                    <p id="modalDescDash" class="text-muted mb-4"></p>
+                    <div class="bg-light p-3 rounded mb-4 text-start">
+                        <h6 class="fw-bold text-primary mb-2">Keunggulan Paket Premium (Scale):</h6>
+                        <ul class="small text-muted mb-0">
+                            <li><i class="fa fa-check text-success me-2"></i>Batas maksimal 5 lapangan.</li>
+                            <li><i class="fa fa-check text-success me-2"></i>Potongan komisi hanya 4%.</li>
+                            <li><i class="fa fa-check text-success me-2"></i>Akses penuh Laporan Analitik & Keuangan.</li>
+                            <li><i class="fa fa-check text-success me-2"></i>Bisa mengatur Harga Promo.</li>
+                        </ul>
+                    </div>
+                    <form id="formUpgradeDash" class="d-flex flex-column gap-2">
+                        <button type="button" id="btnPremiumAjax" class="btn btn-warning fw-bold text-dark w-100 py-2">
+                            <i class="fa fa-rocket me-2"></i>Upgrade ke Premium
+                        </button>
+                        <button type="button" id="btnNormalAjax" class="btn btn-outline-secondary w-100 py-2">
+                            Tetap Lanjut <span id="namaPaketLanjutDash"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnsUpgrade = document.querySelectorAll('.btn-upgrade-dash');
+            if (btnsUpgrade.length > 0) {
+                const modal = new bootstrap.Modal(document.getElementById('modalUpgradeDash'));
+                const modalDesc = document.getElementById('modalDescDash');
+                const namaPaketLanjut = document.getElementById('namaPaketLanjutDash');
+                let currentBtnEl = null;
+
+                btnsUpgrade.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        currentBtnEl = this;
+                        const paket = this.getAttribute('data-paket');
+                        
+                        if (paket === 'Starter') {
+                            modalDesc.innerHTML = "Anda saat ini berada di <strong>Paket Standar (Starter)</strong>.<br>Batasan: Maksimal hanya 1 lapangan dan tanpa laporan otomatis.";
+                            namaPaketLanjut.innerText = "ke Growth";
+                        } else if (paket === 'Growth') {
+                            modalDesc.innerHTML = "Anda saat ini berada di <strong>Paket Growth</strong>.<br>Batasan: Fitur menengah, kuota lapangan terbatas (maks 2), dan potongan 6%.";
+                            namaPaketLanjut.innerText = "Perpanjang Growth";
+                        }
+                        
+                        modal.show();
+                    });
+                });
+
+                document.getElementById('btnPremiumAjax').addEventListener('click', function() {
+                    const btn = this;
+                    btn.innerHTML = '<i class="fa fa-spinner fa-spin me-2"></i>Memproses...';
+                    btn.disabled = true;
+
+                    const formData = new FormData();
+                    formData.append('action_upgrade', 'premium');
+                    formData.append('is_ajax', '1');
+
+                    fetch('dashboard.php', { method: 'POST', body: formData })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            modal.hide();
+                            alert('Pengajuan Upgrade ke Premium berhasil dikirim! Silakan tunggu konfirmasi Super Admin.');
+                            // Update UI langsung tanpa refresh
+                            if (currentBtnEl) {
+                                currentBtnEl.innerText = "Menunggu Konfirmasi";
+                                currentBtnEl.classList.remove('btn-warning', 'btn-info');
+                                currentBtnEl.classList.add('btn-secondary');
+                                currentBtnEl.disabled = true;
+                            }
+                        }
+                        btn.innerHTML = '<i class="fa fa-rocket me-2"></i>Upgrade ke Premium';
+                        btn.disabled = false;
+                    })
+                    .catch(err => {
+                        alert('Terjadi kesalahan koneksi.');
+                        btn.innerHTML = '<i class="fa fa-rocket me-2"></i>Upgrade ke Premium';
+                        btn.disabled = false;
+                    });
+                });
+
+                document.getElementById('btnNormalAjax').addEventListener('click', function() {
+                    const btn = this;
+                    btn.disabled = true;
+                    btn.innerText = 'Memproses...';
+
+                    const formData = new FormData();
+                    formData.append('action_upgrade', 'normal');
+                    formData.append('is_ajax', '1');
+
+                    fetch('dashboard.php', { method: 'POST', body: formData })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'redirect') {
+                            window.location.href = data.url;
+                        }
+                    });
+                });
+            }
+        });
+    </script>
 </body>
 </html>

@@ -16,7 +16,7 @@
         <a href="index.php" class="btn btn-outline-light">Kembali ke Beranda</a>
     </nav>
     <div class="container py-5">
-        <h2 class="mb-4 text-center">Daftar Lapangan Futsal (Arcamanik & Sekitarnya)</h2>
+        <h2 class="mb-4 text-center">Daftar Lapangan Futsal (Kota Bandung)</h2>
         <div class="row g-4">
             <?php
             $result = $conn->query("SELECT l.*, m.paket 

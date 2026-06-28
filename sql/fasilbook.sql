@@ -114,6 +114,20 @@ INSERT INTO `pesanan` (`id`, `lapangan_id`, `nama_pemesan`, `tanggal_booking`, `
 (6, 4, 'Garuda FC', '2026-06-27', '20:00:00', 'Lunas', 'Sudah Dicairkan'),
 (7, 6, 'Elang Jawa', '2026-06-28', '08:00:00', 'Menunggu Konfirmasi', 'Ditahan');
 
+/* -------------------------------------------------------- */
+/* Struktur dari tabel `pengajuan_upgrade` */
+
+CREATE TABLE `pengajuan_upgrade` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_mitra` int(11) NOT NULL,
+  `paket_asal` varchar(50) NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'Pending Premium',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `id_mitra` (`id_mitra`),
+  CONSTRAINT `fk_upgrade_mitra` FOREIGN KEY (`id_mitra`) REFERENCES `mitra` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
 COMMIT;
 

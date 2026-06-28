@@ -29,7 +29,7 @@
     </div>
 
     <div class="container py-5">
-        <h3 class="text-center mb-5 font-poppins">Katalog Lapangan Mitra (Arcamanik & Sekitarnya)</h3>
+        <h3 class="text-center mb-5 font-poppins">Katalog Lapangan Mitra (Kota Bandung)</h3>
         <div class="row g-4">
             <?php
             $res = $conn->query("SELECT l.*, m.paket 

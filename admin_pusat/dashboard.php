@@ -24,6 +24,20 @@ if (isset($_GET['cairkan_dana'])) {
     echo "<script>alert('Dana telah dicairkan ke mitra.'); window.location.href='dashboard.php';</script>";
 }
 
+// 4. ACTION: Approve Upgrade Paket
+if (isset($_GET['approve_upgrade'])) {
+    $id_upgrade = intval($_GET['approve_upgrade']);
+    $q_upgrade = $conn->query("SELECT id_mitra FROM pengajuan_upgrade WHERE id = '$id_upgrade'");
+    if ($q_upgrade->num_rows > 0) {
+        $id_m = $q_upgrade->fetch_assoc()['id_mitra'];
+        // Update mitra to Premium (Scale), komisi 4% dan aktifkan
+        $conn->query("UPDATE mitra SET paket = 'Scale', komisi_persen = 4, status_akun = 'Aktif' WHERE id = '$id_m'");
+        // Hapus pengajuan
+        $conn->query("DELETE FROM pengajuan_upgrade WHERE id = '$id_upgrade'");
+        echo "<script>alert('Mitra berhasil diupgrade ke Premium (Scale)!'); window.location.href='dashboard.php';</script>";
+    }
+}
+
 // === DATA STATISTIK ===
 $pendapatan = $conn->query("SELECT SUM((l.harga_per_jam * m.komisi_persen) / 100) as total FROM pesanan p JOIN lapangan l ON p.lapangan_id = l.id JOIN mitra m ON l.id_mitra = m.id WHERE p.status_pembayaran = 'Lunas'")->fetch_assoc()['total'] ?? 0;
 $total_mitra = $conn->query("SELECT COUNT(id) as total FROM mitra WHERE status_akun = 'Aktif'")->fetch_assoc()['total'];
@@ -125,6 +139,33 @@ $dana_siap_cair = $conn->query("SELECT SUM(l.harga_per_jam - (l.harga_per_jam * 
                 </table>
             </div>
         </div>
+
+        <!-- DAFTAR PENGAJUAN UPGRADE PAKET MITRA -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius:12px; overflow:hidden;">
+            <div class="card-header bg-success text-white fw-bold py-3"><i class="fa fa-level-up-alt me-2"></i>Daftar Pengajuan Upgrade Paket Mitra</div>
+            <div class="table-responsive">
+                <table class="table table-hover m-0">
+                    <thead class="table-light"><tr><th>Nama Mitra</th><th>Paket Asal</th><th>Status Pengajuan</th><th>Aksi</th></tr></thead>
+                    <tbody>
+                        <?php 
+                        $q_upg = $conn->query("SELECT u.id, u.paket_asal, u.status, m.nama_mitra FROM pengajuan_upgrade u JOIN mitra m ON u.id_mitra = m.id WHERE u.status = 'Pending Premium'");
+                        if($q_upg && $q_upg->num_rows > 0) {
+                            while($u = $q_upg->fetch_assoc()) {
+                                echo "<tr>
+                                    <td class='fw-bold'>{$u['nama_mitra']}</td>
+                                    <td><span class='badge bg-secondary'>{$u['paket_asal']}</span></td>
+                                    <td><span class='badge bg-warning text-dark'>{$u['status']}</span></td>
+                                    <td><a href='?approve_upgrade={$u['id']}' class='btn btn-sm btn-success' onclick=\"return confirm('Setujui upgrade ke Premium untuk mitra ini?')\"><i class='fa fa-check me-1'></i>Setujui</a></td>
+                                </tr>";
+                            }
+                        } else {
+                            echo "<tr><td colspan='4' class='text-center text-muted py-3'>Tidak ada pengajuan upgrade ke Premium.</td></tr>";
+                        } ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
 
         <!-- PEMANTAUAN SEMUA PESANAN & REFUND -->
         <div class="card shadow-sm border-0 mb-4" style="border-radius:12px; overflow:hidden;">
